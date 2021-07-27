@@ -1,0 +1,389 @@
+﻿
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+    <script src="/Scripts/boot.js?v=$AppVersion" type="text/javascript"></script>
+    <script src="/Scripts/PlatForm/ComTools.js?v=$AppVersion" type="text/javascript"></script>
+    <script src="/Scripts/PlatForm/SingleForm.js?v=$AppVersion" type="text/javascript"></script>
+    <link href="/Scripts/plugins/uploadify/uploadify.css?v=$AppVersion" rel="stylesheet" type="text/css" />
+    <script src="/Scripts/plugins/uploadify/jquery.uploadify.html5.js?v=$AppVersion" type="text/javascript"></script>
+    <script src="/Form/Init/$Model.data.FormId/$Model.data.FormState/$Model.data.KeyValue"></script>
+    <script type="text/javascript" hasvelocity="true">
+        var OpenFormId = "$Model.data.OpenFormId"
+        var FormId = "$Model.data.FormId"
+        var FormState = "$Model.data.FormState"
+        var KeyValue = "$Model.data.KeyValue"
+        var SingleParams = ""
+
+/**/</script>
+</head>
+<body>
+    <div class="row-wrap">
+        <div class="row  row-hd row-hd-responsive" style="height: 100%">
+            <div class="col-md-4 col-hd-12">
+                <div class="portlet blue box" style="height: 100%">
+                    <div class="portlet-title">
+                        <div class="caption">
+
+                            <a class="mini-button blue" id="PS_PI_Class.Add" onclick="PowerForm.OnBtnAdd(this)"><i class="fa fa-plus"></i>新增</a>
+                            <a class="mini-button blue" id="PS_PI_Class.Del" onclick="PowerForm.OnBtnDel(this,SingleParams)"><i class="fa fa-trash-o"></i>删除</a>
+                            <a class="mini-button blue" visible="false" id="PS_PI_Class.Edit" onclick="PowerForm.OnBtnEdit(this)"><i class="fa fa-pencil"></i>编辑</a>
+                            <!-- <a class="mini-button blue" id="PS_PI_Class.Refresh" onclick="PowerForm.OnBtnRefresh(this)"><i class="fa fa-refresh"></i>刷新</a>
+                            data-options="{lazyload:true}"  -->
+                            <a class="mini-button blue" id="PS_PI_Class.Save" onclick="PowerForm.OnBtnSave(this)"><i class="fa fa-save"></i>保存</a>
+                            <a class="mini-button blue" id="PS_PI_Class.MoveUp" onclick="PowerForm.OnBtnMoveUp(this)"><i class="fa fa-arrow-up"></i></a>
+                            <a class="mini-button blue" id="PS_PI_Class.MoveDown" onclick="PowerForm.OnBtnMoveDown(this)"><i class="fa fa-arrow-down"></i></a>
+                            <a class="mini-button blue" id="PS_PI_Class.MoveLeft" onclick="PowerForm.OnBtnMoveLeft(this)"><i class="fa fa-arrow-left"></i></a>
+                            <a class="mini-button blue" id="PS_PI_Class.MoveRight" onclick="PowerForm.OnBtnMoveRight(this)"><i class="fa fa-arrow-right"></i></a>
+
+                        </div>
+                        <div class="tools">
+                        </div>
+                    </div>
+                    <div class="portlet-body" style="height:100%">
+                        <div id="PS_PI_Class" class="mini-treegrid" editnextonenterkey="true" visible="true" allowcellselect="true" name="TreeColumn"
+                             checkrecursive="false" expandonload="true" idfield="Id" treecolumn="text" width="1000" allowcelledit="true" fitcolumns=""
+                             parentfield="ParentId" height="1000" allowresize="true" checkmodel="multiple" style="width: 100%; height: 100%;" expandonload="true"
+                             oncellendedit="EidtAppClass" multiSelect="true">
+
+                            <div property="columns">
+                                <div type="checkcolumn" width="30"></div>
+                                <div name="text" field="PiClassCode" header="分类编码" width="50" headeralign="center" allowsort="true">分类编码<input property="editor" class="mini-textbox" style="width: 100%;" /> </div>
+
+                                <div field="PiClassName" header="分类名称" width="60" headeralign="center" allowsort="true">分类名称<input property="editor" class="mini-textbox" style="width: 100%;" /> </div>
+
+                                <div field="PiClassType" type="comboboxcolumn" width="20" headeralign="center" header="类型" allowsort="true">类型<input id="PS_PI_New_Class.PiClassType" property="editor" class="mini-combobox" style="width: 100%;" /> </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--end col-md-5-->
+            <div class="col-md-8 col-hd-12">
+                <div class="portlet blue box" style="height: 100%">
+                    <div class="portlet-title">
+                        <div class="captiontools">
+                            <a class="mini-button blue" id="PS_PI_New.Add" onclick="PowerForm.OnBtnAdd(this)"><i class="fa fa-plus"></i>新增</a>
+                            <a class="mini-button blue" id="PS_PI_New.Del" onclick="PowerForm.OnBtnDel(this,SingleParams)"><i class="fa fa-trash-o"></i>删除</a>
+                            <a class="mini-button blue" id="PS_PI_New.Save" onclick="PowerForm.OnBtnSave(this)"><i class="fa fa-save"></i>保存</a>
+                            <a class="mini-button blue" id="PS_PI_Class.Refresh" onclick="PowerForm.OnBtnRefresh(this)"><i class="fa fa-refresh"></i>刷新</a>
+                            <a class="mini-button blue" href="/Upload/分项导入.xls">分项模版下载</a>
+                            <a class="mini-button blue" href="/Upload/支付项导入.xls">支付项模版下载</a>
+                            <div id="PS_PI_Class.Upload"><i class="fa fa-retweet"></i>分类导入</div>
+                            <div id="btnUpload">  </div>
+                        </div>
+                        <div class="tools">
+                        </div>
+                    </div>
+                    <div class="portlet-body" style="height: 100%">
+                        <div id="PS_PI_New" idfield="Id" class="mini-datagrid" style="width: 100%; height: 100%;" allowresize="true" oncellendedit="EidtApp"
+                             allowcelledit="true" allowcellselect="true" multiselect="true" showpager="false" ondrawcell="drawcell" data-options="{canImport:true}">
+                            <div property="columns">
+                                <div type="checkcolumn" width="30"></div>
+                                <div type="indexcolumn" width="20"></div>
+                                <div field="PiCode" headeralign="center" width="60">
+                                    编号
+                                    <input property="editor" class="mini-textbox" style="width: 100%;" />
+                                </div>
+                                <div field="PiName" headeralign="center" width="120">
+                                    名称
+                                    <input property="editor" class="mini-textbox" style="width: 100%;" />
+                                </div>
+                                <div field="NodeType" type="comboboxcolumn" headeralign="center" width="60" align="center">
+                                    节点类型
+                                    <input property="editor" class="mini-combobox" style="width: 100%;" />
+                                </div>
+                                <div field="PiUnit" headeralign="center" width="60" align="center">
+                                    单位
+                                    <input property="editor" class="mini-textbox" style="width: 100%;" />
+                                </div>
+                                <div field="OriginalAmount" headeralign="center" width="60" align="center">
+                                    原合同量
+                                    <input property="editor" class="mini-spinner" allowlimitvalue="true" minvalue="0" maxvalue="999999999999999" changeonmousewhere="false" style="width: 100%;" />
+                                </div>
+                                <div field="UnitPrice" headeralign="center" width="60" align="center">
+                                    单价
+                                    <input property="editor" class="mini-spinner" allowlimitvalue="true" minvalue="0" maxvalue="999999999999999" changeonmousewhere="false" style="width: 100%;" />
+                                </div>
+
+
+                                <div field="OriginalMoney" headeralign="center" width="80" align="center">
+                                    原合同金额
+                                    <input property="editor" class="mini-spinner" allowlimitvalue="true" minvalue="0" maxvalue="999999999999999" changeonmousewhere="false" readonly="readonly" style="width: 100%;" />
+                                </div>
+
+                                <div field="ChangeAmount" headeralign="center" width="60" align="center">
+                                    变更数量
+                                    <input property="editor" class="mini-spinner" allowlimitvalue="true" minvalue="0" maxvalue="999999999999999" changeonmousewhere="false" style="width: 100%;" />
+                                </div>
+                                <div field="ChangeMoney" headeralign="center" width="80" align="center">
+                                    变更金额
+                                    <input property="editor" class="mini-spinner" allowlimitvalue="true" minvalue="0" maxvalue="999999999999999" changeonmousewhere="false" readonly="readonly" style="width: 100%;" />
+                                </div>
+
+                                <div field="PiAmount" headeralign="center" width="60" align="center">
+                                    数量
+                                    <input property="editor" class="mini-spinner" allowlimitvalue="true" minvalue="0" maxvalue="999999999999999" changeonmousewhere="false" readonly style="width: 100%;" />
+                                </div>
+                                <div field="PiMoney" headeralign="center" width="60" align="center">
+                                    金额
+                                    <input property="editor" class="mini-spinner" allowlimitvalue="true" minvalue="0" maxvalue="999999999999999" changeonmousewhere="false" readonly="readonly" style="width: 100%;" />
+                                </div>
+                                <div field="CurrencyType" headeralign="center" type="comboboxcolumn" width="60" align="center">
+                                    币种
+                                    <input property="editor" id="PS_PI_New.CurrencyType" class="mini-combobox" style="width: 100%;" />
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="portlet blue box" style="height: 50%">
+                    <div class="portlet-title">
+                        <div class="captiontools">
+                            <a class="mini-button blue" id="PS_PI_PriceAnalysis.Add" onclick="PowerForm.OnBtnAdd(this)"><i class="fa fa-plus"></i>新增</a>
+                            <a class="mini-button blue" id="PS_PI_PriceAnalysis.Del" onclick="PowerForm.OnBtnDel(this,SingleParams)"><i class="fa fa-trash-o"></i>删除</a>
+                            <a class="mini-button blue" id="PS_PI_PriceAnalysis.Save" onclick="PowerForm.OnBtnSave(this)"><i class="fa fa-save"></i>保存</a>
+                            <a class="mini-button blue" id="PS_PI_PriceAnalysis.Refresh" onclick="PowerForm.OnBtnRefresh(this)"><i class="fa fa-refresh"></i>刷新</a>
+
+                        </div>
+                        <div class="tools">
+                        </div>
+                    </div>
+                    <div class="portlet-body" style="height: 100%">
+                        <div id="PS_PI_PriceAnalysis" idfield="Id" class="mini-datagrid" style="width: 100%; height: 100%;" allowresize="true" oncellendedit="EidtApp3"
+                             allowcelledit="true" allowcellselect="true" multiselect="true" showpager="false" ondrawcell="drawcell">
+                            <div property="columns">
+                                <div type="indexcolumn" width="20"></div>
+                                <div field="ItemNo" headeralign="center" width="60">
+                                    编号
+                                    <input property="editor" class="mini-textbox" style="width: 100%;" />
+                                </div>
+                                <div field="ItemName" headeralign="center" width="120">
+                                    名称
+                                    <input property="editor" class="mini-textbox" style="width: 100%;" />
+                                </div>
+                                <div field="ItemType" type="comboboxcolumn" headeralign="center" width="60" align="center">
+                                    类型
+                                    <input property="editor" class="mini-combobox" style="width: 100%;" />
+                                </div>
+                                <div field="UnitName" headeralign="center" width="60" align="center">
+                                    单位
+                                    <input property="editor" class="mini-textbox" style="width: 100%;" />
+                                </div>
+                                <div field="UnitPrice" headeralign="center" width="60" align="center">
+                                    单价
+                                    <input property="editor" class="mini-spinner" allowlimitvalue="true" minvalue="0" maxvalue="999999999999999" changeonmousewhere="false" style="width: 100%;" />
+                                </div>
+                                <div field="Amount" headeralign="center" width="60" align="center">
+                                    数量
+                                    <input property="editor" class="mini-spinner" allowlimitvalue="true" minvalue="0" maxvalue="999999999999999" changeonmousewhere="false" style="width: 100%;" />
+                                </div>
+                                <div field="TotalPrice" headeralign="center" width="60" align="center">
+                                    合价
+                                    <input property="editor" class="mini-spinner" allowlimitvalue="true" minvalue="0" maxvalue="999999999999999" changeonmousewhere="false" readonly="readonly" style="width: 100%;" />
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <!--end col-md-6-->
+        </div>
+    </div>
+    <div id="win_search" class="mini-window" title="查询面板" style="width: 375px; height: 290px;" showmodal="false" allowresize="true" allowdrag="true" onbuttonclick="onbuttonclick">
+        <div style="height: 195px; overflow:auto;">
+            <table id="ConditionTable" style="width: 342px; margin-top: 5px; margin-left:auto; margin-right:auto;"></table>
+        </div>
+        <table style="width: 363px; height: 30px; margin-top:8px;">
+            <tr>
+                <td align="center" style="text-align:right;">
+                    <a class="mini-button blue" id="BtnSearch" onclick="PowerForm.OnPageChanged(this)"><i class="fa fa-search"></i>搜索</a>
+                    <a class="mini-button blue" id="BtnSearch_Clear" onclick="PowerForm.OnClearSeach(this)"><i class="fa fa-repeat"></i>清空</a>
+                    <a class="mini-button blue" id="BtnSearch_Close" name="close" onclick="onbuttonclick(this)"><i class="fa fa-close"></i>关闭</a>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <script type="text/javascript">
+        var PowerForm = new SingleForm();
+        $(function () {
+            PowerForm.Init();
+            FileUp("PS_PI_New", CreateGUID())//此处修改关键词
+        });
+        mini.parse();
+
+        //PowerForm.EventBeforeAddRow = function (e, row) {
+
+        //    mini.get("PS_PI_New").on("cellcommitedit", function (e) {
+        //        if (e.field == "PiCode") {
+
+        //            funsself.MyExec("IsRepeatCode", { "KeyWord": "PS_PI_New", "KeyValue": e.row.Id, "PiCode": e.value }, function (txt) {
+        //                if (txt == "False")
+        //                    Power.ui.warning("编号已存在");
+        //                e.cancel = txt == "False";
+        //            }, true);
+        //        }
+        //    })
+        //}
+        function onbuttonclick(e) {
+            if (e.name == "close") {
+                var win = mini.get("win_search");
+                win.hide();
+            }
+        }
+
+
+        var tree = mini.get("PS_PI_Class");
+        var tree_project_type = -1;
+        tree.on("nodeselect", function (e) {
+            tree_project_type = e.node.project_type;
+        });
+
+        PowerForm.EventBeforeAddForm = function (e) {
+            if (tree_project_type != 1) {
+                Power.form.warning("请选择项目节点进行新增");
+                e.canNext = false;
+            }
+            else {
+                e.canNext = true;
+            }
+        }
+        function EidtAppClass(e) {
+            var PowerForm = new SingleForm();
+            PowerForm.OnBtnSave(this);
+            var node = e.record;
+            var paretNode = tree.getParentNode(node);
+            if (paretNode.Id != undefined) {
+                //判断、并进行计算
+                tree.updateRow(node, { PiClassType: paretNode.PiClassType });
+            }
+
+        }
+        function EidtApp3(e) {
+            //获取节点
+            var record = e.record;
+            var grid = e.sender;
+
+
+            //判断、并进行计算
+            if (e.field == "UnitPrice" || e.field == "Amount") {
+                var Amount = record.Amount || 0;
+                var UnitPrice = record.UnitPrice || 0;
+
+
+                grid.updateRow(record, { TotalPrice: (parseFloat(UnitPrice) * parseFloat(Amount)) });
+
+            }
+        }
+        function EidtApp(e) {
+            var PowerForm = new SingleForm();
+            PowerForm.OnBtnSave(this);
+            //获取节点
+            var record = e.record;
+            var grid = mini.get(PS_PI_New);
+
+            var price = record.UnitPrice || 0;
+            var OriginalAmount = record.OriginalAmount || 0;
+            var OriginalMoney = record.OriginalMoney || 0;
+            var ChangeAmount = record.ChangeAmount || 0;
+            var ChangeMoney = record.ChangeMoney || 0;
+            //判断、并进行计算
+            if (e.field == "UnitPrice" || e.field == "OriginalAmount" || e.field == "OriginalMoney" || e.field == "ChangeAmount" || e.field == "ChangeMoney") {
+
+                grid.updateRow(record, { OriginalMoney: (parseFloat(price) * parseFloat(OriginalAmount)) });
+
+                grid.updateRow(record, { ChangeMoney: (parseFloat(price) * parseFloat(ChangeAmount)) });
+
+                grid.updateRow(record, { PiAmount: (parseFloat(OriginalAmount) + parseFloat(ChangeAmount)) });
+
+                grid.updateRow(record, { PiMoney: (parseFloat(price) * parseFloat(OriginalAmount) + parseFloat(price) * parseFloat(ChangeAmount)) });
+
+            }
+        }
+        function drawcell(e) {
+            if (e.record.NodeType == 'C2') {
+                e.rowStyle = "background:#FA8072;";
+            }
+        }
+        function FileUp(keyword, keyvalue) {
+            mini.parse();
+
+            if (keyword == "")
+                keyword = "PS_PI_New";//此处修改关键词
+
+            if (keyvalue == undefined || keyvalue == "")
+                keyvalue = "00000000-0000-0000-0000-000000000000";
+            var sender = FormFuns.GetMiniFormGrid(keyword);
+            FormFuns.ReLoadData(sender);
+            var grid = mini.get("PS_PI_New");//此处修改关键词
+            $("#btnUpload").html("");
+            $("#btnUpload").uploadify({
+                "height": 30,
+                width: "56",
+                fileSizeLimit: 0,
+                auto: true,
+                blocksize: 2048 * 500, //分块大小
+                "buttonText": "<i class=\"fa fa-retweet\"></i>支付项导入",
+                "swf": '/Scripts/plugins/uploadify/uploadify.swf',
+                "uploader": '/PowerPlat/Control/File.ashx?_type=ftp&action=upload',
+                formData: {
+                    KeyWord: keyword,
+                    KeyValue: keyvalue
+                },
+                onUploadStart: function () {
+                    if (formconfig.FormState == "add") {
+                        Power.ui.alert("请先保存主表");
+                        return;//新增时，不能导入
+                    }
+                    grid.loading("上传中，请稍后.....");
+                    mini.get("PS_PI_New").loading("上传中，请稍后.....");//此处修改关键词
+                },
+                onUploadComplete: function () {
+                    grid.loading("导入中,请稍后.....");
+                    mini.get("PS_PI_New").loading("导入中，请稍后.....");//此处修改关键词
+                    var exec = {};  //对象
+                    exec.KeyWord = "PS_PI_New";   //bo的KeyWord//此处修改关键词
+                    exec.MethodName = "ImportPS_PI"; //方法名称//此处修改方法名称
+                    //如果是数据集的话，要加上 exec.KeyWordType="ViewEntity";
+                    var ClassId = mini.get("PS_PI_Class").getSelectedNode().Id;
+                    exec.MethodParams = {}; //方法参数
+                    var params = exec.MethodParams;
+                    params.KeyWord = keyword;
+                    params.KeyValue = keyvalue;
+                    params.Id = ClassId;
+
+                    var txt = mini.encode(exec); //对象转换成字符串
+
+                    $.ajax({
+                        url: "/API/Exec",
+                        type: "POST",
+                        data: { jsonData: txt }, //对象字符串传递给 jsonData变量
+                        cache: false,
+                        success: function (text) {
+                            var tmp = mini.decode(text);
+                            if (tmp.data.value != "")
+                                Power.ui.alert(tmp.data.value);
+                            mini.get("PS_PI_New").reload();//此处修改关键词
+                            grid.reload();
+                        }
+                    });
+                },
+                onDialogClose: function () {
+                }
+            });
+            $(".uploadify-button-text").addClass("btn").addClass("btn-primary");
+
+        }
+    </script>
+</body>
+</html>
