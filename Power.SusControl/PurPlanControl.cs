@@ -20,11 +20,11 @@ namespace Power.SusControl
         public void setContentType()
         {
             if ( this.Context != null && this.Context.Response != null )
-            {               
+            {
                 this.Context.Response.ContentType = "application/json; charset=utf-8";
             }
         }
-        [Action(Authorize =false)]
+        [Action(Authorize = false)]
         public string Test(string value)
         {
             NewLife.Log.XTrace.WriteLine("value");
@@ -44,21 +44,22 @@ namespace Power.SusControl
             ViewResultModel result = ViewResultModel.Create(false, "创建采购计划执行监控");
             try
             {
-                string _keywordplan = "Sus_MakePlans",_keywordcontrol= "Sus_Pur_PlanControl",_keywordcontroldtl= "Sus_Pur_PlnControlDtl";
+                string _keywordplan = "Sus_MakePlans", _keywordcontrol = "Sus_Pur_PlanControl", _keywordcontroldtl = "Sus_Pur_PlanControlDtl";
                 var planOpt = BusinessFactory.CreateBusinessOperate(_keywordplan);
-                var planList = planOpt.FindAll("EpsProjId",this.session.EpsProjId);
+                var planList = planOpt.FindAll("EpsProjId='" + this.session.EpsProjId + "'", "Sequ", "");
+                var oldControlList = BusinessFactory.CreateBusinessOperate(_keywordcontrol).FindAll("EpsProjId", this.session.EpsProjId);
                 if ( planList.Count == 0 )
                     throw new Exception("采购计划不存在");
                 var controlId = Guid.NewGuid();
-                var saveList = BusinessFactory.CreateBusinessOperate(_keywordcontroldtl).FindAll("1=0", "Sequ","");
-                var periods = new string[] { "持续时间","计划完成日期","预估完成日期","实际完成日期","状态"};
+                var saveList = BusinessFactory.CreateBusinessOperate(_keywordcontroldtl).FindAll("1=0", "Sequ", "");
+                var periods = new string[] { "持续时间", "计划完成日期", "预估完成日期", "实际完成日期", "状态" };
                 var offset = 0;
-                foreach(var row in planList )
+                foreach ( var row in planList )
                 {
                     int sequ = Convert.ToInt32(row["Sequ"]);
                     int dtlSequ = sequ + offset;
                     offset += 5;
-                    for(int i=0;i< periods.Length;i++)
+                    for ( int i = 0; i < periods.Length; i++ )
                     {
                         var saveBo = BusinessFactory.CreateBusiness(_keywordcontroldtl);
                         saveBo.SetItem("Id", Guid.NewGuid());
@@ -73,7 +74,10 @@ namespace Power.SusControl
                         saveBo.SetItem("TechnicalEngineer", row["TechnicalEngineer"]);
                         saveBo.SetItem("Period", periods[i]);
                         saveBo.SetItem("Sequ", dtlSequ + i);
-                        if( periods[i] == "计划完成日期" )
+                        saveBo.SetItem("DesignDate", row["DesignDate"]);
+                        saveBo.SetItem("DeliveryDate", row["DeliveryDate"]);
+                        saveBo.SetItem("NewDeliveryDate", row["NewDeliveryDate"]);
+                        if ( periods[i] == "计划完成日期" || periods[i] == "预估完成日期" )
                         {
                             saveBo.SetItem("Step0", DateToString(row["Step0"]));
                             saveBo.SetItem("Step1", DateToString(row["Step1"]));
@@ -95,12 +99,17 @@ namespace Power.SusControl
                 controlBo.SetItem("ProjectName", Project["project_name"]);
                 controlBo.SetItem("ProjectManager", Project["Pro_manager_name"]);
                 controlBo.SetItem("Address", Project["project_address"]);
-                controlBo.Save(System.ComponentModel.DataObjectMethodType.Insert);
-                int count=saveList.Save(true);
-                result.data.Add("count", count);
+                using ( var tran = new XCode.EntityTransaction(planOpt.GetEntityOperate()) )
+                {
+                    oldControlList.Delete();//删除以前的版本记录
+                    controlBo.Save(System.ComponentModel.DataObjectMethodType.Insert);
+                    int count = saveList.Save(true);
+                    result.data.Add("count", count);
+                    tran.Commit();
+                }
                 result.success = true;
             }
-            catch(Exception ex)
+            catch ( Exception ex )
             {
                 result.message = ex.Message;
             }
@@ -112,7 +121,7 @@ namespace Power.SusControl
             if ( dt == new DateTime() )
                 return null;
             else
-               return dt.ToString("yyyy-MM-dd");
+                return dt.ToString("yyyy-MM-dd");
         }
     }
 }
