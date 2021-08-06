@@ -1021,6 +1021,8 @@ namespace Power.SusControl
                         busin.SetItem("Id", guid);
                         busin.SetItem("InquiryName", busi["BidInquiryTitle"]);
                         busin.SetItem("InquiryCode", busi["BidInquiryCode"]);
+                        busin.SetItem("DeviceId", busi["DeviceId"]);
+                        busin.SetItem("DeviceCode", busi["DeviceCode"]);
                         busin.SetItem("Memo", it["Assessors"].ToString());
                         busin.SetItem("Name", busi["BidInquiryTitle"]);
                         busin.SetItem("Status", "20");
