@@ -10,12 +10,12 @@ namespace Power.SusControl.Models
         public PurPlanRow(params object[] array)
         {
 
-            for ( int i =0; i < array.Length; i++)
+            for ( int i = 0; i < array.Length; i++ )
             {
                 var dtStr = Convert.ToString(array[i]);
                 if ( string.IsNullOrEmpty(dtStr) )
                     continue;
-                this[i+1] = DateEntity.Create(array[i]);
+                this[i + 1] = DateEntity.Create(array[i]);
             }
         }
         public string Id;
@@ -75,7 +75,7 @@ namespace Power.SusControl.Models
                 switch ( i )
                 {
                     case 1:
-                        entity=this.Step1;
+                        entity = this.Step1;
                         break;
                     case 2:
                         entity = this.Step2;
@@ -117,8 +117,8 @@ namespace Power.SusControl.Models
             instance.RawDate = Convert.ToDateTime(obj);
             instance.HasValue = instance.RawDate.HasValue;
             if ( instance.RawDate.HasValue )
-            { 
-                instance.year= instance.RawDate.Value.Year;
+            {
+                instance.year = instance.RawDate.Value.Year;
                 instance.month = instance.RawDate.Value.Month;
                 instance.day = instance.RawDate.Value.Day;
                 instance.Value = new DateTime(instance.year, instance.month, instance.day);
@@ -129,7 +129,7 @@ namespace Power.SusControl.Models
         int year;
         int month;
         int day;
-        DateTime? RawDate;        
+        DateTime? RawDate;
         public DateTime Value;
         public int IntervalMin;
         public int IntervalAvg;
@@ -138,10 +138,27 @@ namespace Power.SusControl.Models
         {
             if ( RawDate.HasValue )
             {
-                return string.Format("{0}-{1:D2}-{2:D2}",year,month,day);
+                return string.Format("{0}-{1:D2}-{2:D2}", year, month, day);
             }
             else
                 return null;
         }
+    }
+    public class updateRow{
+        public string Step0;
+        public string Step1;
+        public string Step2;
+        public string Step3;
+        public string Step4;
+        public string Step5;
+        public string Step6;
+        public string Step7;
+        public string Step8;
+        public string _status;
+        public DateTime DeliveryDate;
+        public DateTime DesignDate;
+        public DateTime NewDeliveryDate;
+        public DateTime PlanDesignDate;
+        public Guid PlanId;
     }
 }
