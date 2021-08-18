@@ -40,16 +40,20 @@ namespace Power.SusControl
         /// <param name="id"></param>
         /// <returns></returns>
         [Action]
-        public string CreatePurPlanControl()
+        public string CreatePurPlanControl(string EpsProjId="")
         {
             setContentType();
             ViewResultModel result = ViewResultModel.Create(false, "创建采购计划执行监控");
             try
             {
+                if(string.IsNullOrEmpty(EpsProjId) )
+                {
+                    EpsProjId = this.session.EpsProjId;
+                }
                 string _keywordplan = "Sus_MakePlans", _keywordcontrol = "Sus_Pur_PlanControl", _keywordcontroldtl = "Sus_Pur_PlanControlDtl";
                 var planOpt = BusinessFactory.CreateBusinessOperate(_keywordplan);
-                var planList = planOpt.FindAll("EpsProjId='" + this.session.EpsProjId + "'", "Sequ", "");
-                var oldControlList = BusinessFactory.CreateBusinessOperate(_keywordcontrol).FindAll("EpsProjId", this.session.EpsProjId);
+                var planList = planOpt.FindAll("EpsProjId='" + EpsProjId + "'", "Sequ", "",0,0, SearchFlag.IgnoreRight);
+                var oldControlList = BusinessFactory.CreateBusinessOperate(_keywordcontrol).FindAll("EpsProjId", EpsProjId,SearchFlag.IgnoreRight);
                 if ( planList.Count == 0 )
                     throw new Exception("采购计划不存在");
                 var controlId = Guid.NewGuid();
@@ -94,19 +98,22 @@ namespace Power.SusControl
                         saveList.Add(saveBo);
                     }
                 }
-                var Project = BusinessFactory.CreateBusinessOperate("Project").FindByKey(this.session.EpsProjId);
+                var Project = BusinessFactory.CreateBusinessOperate("Project").FindByKey(EpsProjId);
                 var controlBo = BusinessFactory.CreateBusiness(_keywordcontrol);
                 controlBo.SetItem("Id", controlId);
                 controlBo.SetItem("ProjectCode", Project["project_shortname"]);
                 controlBo.SetItem("ProjectName", Project["project_name"]);
                 controlBo.SetItem("ProjectManager", Project["Pro_manager_name"]);
                 controlBo.SetItem("Address", Project["project_address"]);
+                controlBo.SetItem("OwnProjId", Project["project_guid"]);
+                controlBo.SetItem("EpsProjId", Project["project_guid"]);
                 using ( var tran = new XCode.EntityTransaction(planOpt.GetEntityOperate()) )
                 {
                     oldControlList.Delete();//删除以前的版本记录
                     controlBo.Save(System.ComponentModel.DataObjectMethodType.Insert);
                     int count = saveList.Save(true);
                     result.data.Add("count", count);
+                    result.data.Add("controlId", controlId);
                     tran.Commit();
                 }
                 result.success = true;
@@ -175,15 +182,18 @@ namespace Power.SusControl
                 }
                 string _keywordnotify = "Sus_MakePlans_Notify";
                 var list = Newtonsoft.Json.Linq.JArray.Parse(data);
+                if ( list.Count == 0 )
+                    throw new Exception("数据包不能为空");
                 var notifyId = Guid.NewGuid();
                 result.data.Add("notifyId", notifyId);
+                string ToHumId=null, ToHumName=null;
                 foreach (var token in list)
                 {
                     var bo = Power.Business.BusinessFactory.CreateBusiness(_keywordnotify);
                     string PlanId = token.Value<string>("PlanId");
                     string ToHumCode = token.Value<string>("ToHumCode");
-                    string ToHumName = token.Value<string>("ToHumName");
-                    string ToHumId = token.Value<string>("ToHumId");
+                    ToHumName = token.Value<string>("ToHumName");
+                    ToHumId = token.Value<string>("ToHumId");
                     bo.SetItem("NotifyId", notifyId);
                     bo.SetItem("PlanId", PlanId);
                     bo.SetItem("ToHumCode", ToHumCode);
@@ -198,6 +208,9 @@ namespace Power.SusControl
                     bo.Save(System.ComponentModel.DataObjectMethodType.Insert);
 
                 }
+                string content=ToHumName+"，您有一条任务，请填写" + this.session.EpsProjName + "的采购计划设备交货时间，<a href='/Form/EditForm/dac26bee-2a40-4d12-918b-5ca83d2d4772/" + notifyId + "/'>点击操作</a>";
+                PowerGlobal.messagePool.AddMessage(ToHumId, ToHumName, "填写"+ this.session.EpsProjName + "的采购计划设备交货时间", content,"notify", this.session.HumanId, this.session.HumanName, "", notifyId.ToString());
+                result.data.Add("notify", true);
                 result.data.Add("count", list.Count);
                 result.success = true;
             }
