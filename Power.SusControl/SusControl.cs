@@ -4291,6 +4291,31 @@ namespace Power.SusControl
 
             return result.ToJson();
         }
+        #region 获取附件信息
+        [ActionAttribute(Authorize = false)]
+
+        public string GetConDocFiles(string SubContract_Guid)
+        {
+            ViewResultModel result = ViewResultModel.Create(true, "");
+            String strsql = "select * from View_ContractFilingFile where ContractId = '" + SubContract_Guid + "' and SN in ('04采购合同','05技术协议')";
+            DataTable dtTemp = XCode.DataAccessLayer.DAL.QuerySQL(strsql);
+            var Fileds = "";
+            DataTable dt = new DataTable();
+            foreach ( DataRow item in dtTemp.Rows )
+            {
+                Fileds += "'" + item["FileId"].ToString() + "',";
+            }
+            if ( Fileds != "" )
+            {
+                Fileds = Fileds.Substring(0, Fileds.Length - 1);
+                String sql = "select * from PB_DocFiles where Id in (" + Fileds + ")";
+                dt = XCode.DataAccessLayer.DAL.QuerySQL(sql);
+            }
+            result.data.Add("value", dt);
+            return result.ToJson();
+        }
+
+        #endregion
 
         //加密密钥
         private static string secret = "41894BD9548041D4AC2E0E4EF13DFEC8";
