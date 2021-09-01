@@ -17,7 +17,7 @@ namespace Power.SusControl
 {
     public class SUSAPIControl : BaseControl
     {
-        public const string EEstimateDate = "预估完成日期", EActualDate = "实际完成日期",EPlanDate= "计划完成日期";
+        public const string EEstimateDate = "预估完成日期", EActualDate = "实际完成日期", EPlanDate = "计划完成日期";
         public void setContentType()
         {
             if ( this.Context != null && this.Context.Response != null )
@@ -40,20 +40,20 @@ namespace Power.SusControl
         /// <param name="id"></param>
         /// <returns></returns>
         [Action]
-        public string CreatePurPlanControl(string EpsProjId="")
+        public string CreatePurPlanControl(string EpsProjId = "")
         {
             setContentType();
             ViewResultModel result = ViewResultModel.Create(false, "创建采购计划执行监控");
             try
             {
-                if(string.IsNullOrEmpty(EpsProjId) )
+                if ( string.IsNullOrEmpty(EpsProjId) )
                 {
                     EpsProjId = this.session.EpsProjId;
                 }
                 string _keywordplan = "Sus_MakePlans", _keywordcontrol = "Sus_Pur_PlanControl", _keywordcontroldtl = "Sus_Pur_PlanControlDtl";
                 var planOpt = BusinessFactory.CreateBusinessOperate(_keywordplan);
-                var planList = planOpt.FindAll("EpsProjId='" + EpsProjId + "'", "Sequ", "",0,0, SearchFlag.IgnoreRight);
-                var oldControlList = BusinessFactory.CreateBusinessOperate(_keywordcontrol).FindAll("EpsProjId", EpsProjId,SearchFlag.IgnoreRight);
+                var planList = planOpt.FindAll("EpsProjId='" + EpsProjId + "'", "Sequ", "", 0, 0, SearchFlag.IgnoreRight);
+                var oldControlList = BusinessFactory.CreateBusinessOperate(_keywordcontrol).FindAll("EpsProjId", EpsProjId, SearchFlag.IgnoreRight);
                 if ( planList.Count == 0 )
                     throw new Exception("采购计划不存在");
                 var controlId = Guid.NewGuid();
@@ -186,12 +186,12 @@ namespace Power.SusControl
                     throw new Exception("数据包不能为空");
                 var notifyId = Guid.NewGuid();
                 result.data.Add("notifyId", notifyId);
-                string ToHumId=null, ToHumName=null;
-                foreach (var token in list)
+                string ToHumId = null, ToHumName = null, ToHumCode = null;
+                foreach ( var token in list )
                 {
                     var bo = Power.Business.BusinessFactory.CreateBusiness(_keywordnotify);
                     string PlanId = token.Value<string>("PlanId");
-                    string ToHumCode = token.Value<string>("ToHumCode");
+                    ToHumCode = token.Value<string>("ToHumCode");
                     ToHumName = token.Value<string>("ToHumName");
                     ToHumId = token.Value<string>("ToHumId");
                     bo.SetItem("NotifyId", notifyId);
@@ -199,7 +199,7 @@ namespace Power.SusControl
                     bo.SetItem("ToHumCode", ToHumCode);
                     bo.SetItem("ToHumName", ToHumName);
                     bo.SetItem("ToHumId", ToHumId);
-                    bo.SetItem("FromHumId",this.session.HumanId);
+                    bo.SetItem("FromHumId", this.session.HumanId);
                     bo.SetItem("FromHumCode", this.session.HumanCode);
                     bo.SetItem("FromHumName", this.session.HumanName);
                     bo.SetItem("TempSequ", token.Value<int>("TempSequ"));
@@ -208,8 +208,10 @@ namespace Power.SusControl
                     bo.Save(System.ComponentModel.DataObjectMethodType.Insert);
 
                 }
-                string content=ToHumName+"，您有一条任务，请填写" + this.session.EpsProjName + "的采购计划设备交货时间，<a href='/Form/EditForm/dac26bee-2a40-4d12-918b-5ca83d2d4772/" + notifyId + "/'>点击操作</a>";
-                PowerGlobal.messagePool.AddMessage(ToHumId, ToHumName, "填写"+ this.session.EpsProjName + "的采购计划设备交货时间", content,"notify", this.session.HumanId, this.session.HumanName, "", notifyId.ToString());
+                string content = ToHumName + "，您有一条任务，请填写" + this.session.EpsProjName + "的采购计划设备交货时间，<a href='/Form/EditForm/dac26bee-2a40-4d12-918b-5ca83d2d4772/" + notifyId + "/'>点击操作</a>";
+                SendTaskCenterNotify(null,"填写" + this.session.EpsProjName + "的采购计划设备交货时间", "Sus_MakePlans_Notify", notifyId, "采购计划", ToHumId, ToHumCode, ToHumName, content, notifyId);
+                //  PowerGlobal.messagePool.AddMessage(ToHumId, ToHumName, "填写"+ this.session.EpsProjName + "的采购计划设备交货时间", content,"notify", this.session.HumanId, this.session.HumanName, "", notifyId.ToString());
+
                 result.data.Add("notify", true);
                 result.data.Add("count", list.Count);
                 result.success = true;
@@ -247,6 +249,50 @@ namespace Power.SusControl
                 result.message = ex.Message;
             }
             return result.ToJson();
+        }
+        #endregion
+        #region 发送系统通知
+        /// <summary>
+        /// 发送系统通知
+        /// </summary>
+        /// <param name="data">通知json</param>
+        /// <returns></returns>
+        public void SendTaskCenterNotify(string code,string title, string keyword, Guid keyvalue, string catagory, string toHumId, string toHumCode, string toHumName, string content, Guid notifyId)
+        {
+            try
+            {
+                if ( string.IsNullOrEmpty(catagory) || string.IsNullOrEmpty(keyword) || keyvalue == null )
+                {
+                    throw new Exception("关键词信息不能为空");
+                }
+                if ( string.IsNullOrEmpty(toHumId) || string.IsNullOrEmpty(toHumCode) || string.IsNullOrEmpty(toHumName) )
+                {
+                    throw new Exception("接收人信息不能为空");
+                }
+                string _keywordnotify = "Sus_TaskCenter_Notify";
+                var bo = Power.Business.BusinessFactory.CreateBusiness(_keywordnotify);
+                bo.SetItem("NotifyId", notifyId);//通过notifyId和message表的keyvalue关联
+                bo.SetItem("KeyValue", keyvalue);
+                bo.SetItem("KeyWord", keyword);
+                bo.SetItem("Catagory", catagory);
+                bo.SetItem("ToHumCode", toHumCode);
+                bo.SetItem("ToHumName", toHumName);
+                bo.SetItem("Title", title);
+                bo.SetItem("Code", code);
+                bo.SetItem("ToHumId", toHumId);
+                bo.SetItem("FromHumId", this.session.HumanId);
+                bo.SetItem("FromHumCode", this.session.HumanCode);
+                bo.SetItem("FromHumName", this.session.HumanName);
+                bo.SetItem("EpsProjId", this.session.EpsProjId);
+                bo.SetItem("EpsProjCode", this.session.EpsProjCode);
+                bo.SetItem("EpsProjName", this.session.EpsProjName);
+                bo.Save(System.ComponentModel.DataObjectMethodType.Insert);
+                PowerGlobal.messagePool.AddMessage(toHumId, toHumName, title, content, "notify", this.session.HumanId, this.session.HumanName, "", notifyId.ToString());
+            }
+            catch ( Exception ex )
+            {
+                throw new Exception("发送消息失败:" + ex.Message);
+            }
         }
         #endregion
         #region 获取实际完成时间
@@ -310,7 +356,7 @@ namespace Power.SusControl
                         //NewLife.Log.XTrace.WriteException("更新实际完成时间成功" + field);
                     }
                     var stepDates = new Dictionary<string, DateTime>();
-                    result.data.Add("startIndex_"+ rowCount, startIndex);
+                    result.data.Add("startIndex_" + rowCount, startIndex);
                     if ( startIndex > 0 )
                         calcNextStage(startIndex, row, planDateBo, stepDates);
                     if ( stepDates.ContainsKey("Step6") )
@@ -324,13 +370,13 @@ namespace Power.SusControl
                         var deliveryDate = stepDates["Step8"].AddDays(Convert.ToInt32(estimateDateBo["FabricationCycle"]));
                         stepDates.Add("DeliveryDate", deliveryDate);
                     }
-                    foreach (string key in stepDates.Keys )
+                    foreach ( string key in stepDates.Keys )
                     {
-                        estimateDateBo.SetItem(key,stepDates[key].ToString("yyyy-MM-dd"));//更新预估时间
+                        estimateDateBo.SetItem(key, stepDates[key].ToString("yyyy-MM-dd"));//更新预估时间
                         //预估提资时间                       
                     }
 
-                    result.data.Add("dates_"+ rowCount, stepDates);
+                    result.data.Add("dates_" + rowCount, stepDates);
                     actualDateBo.UpdateSelf();
                     estimateDateBo.UpdateSelf();
                 }
@@ -351,7 +397,7 @@ namespace Power.SusControl
             setContentType();
             NewLife.Log.XTrace.WriteLine("启动获取实际时间定时任务");
             ViewResultModel result = ViewResultModel.Create(true, "获取实际完成时间");
-            result.data.Add("startdate",DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+            result.data.Add("startdate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
             var sqlText = "select t1.ApprDate as Step1,t2.ApprDate as Step2,t3.ApprDate as Step3,t4.ApprDate as Step4,t5.ApprDate as Step5,t6.ApprDate as Step6,t7.ApprDate as Step7,t8.ApprDate as Step8,t1.Id,t1.EpsProjId,t1.OwnProjName as ProjectName,t1.DeviceCode from Sus_TechnicalBook t1 left join Sus_Bid_Inquiry t2 on (t1.DeviceCode=t2.DeviceCode and t1.EpsProjId=t2.EpsProjId and t2.Status=50)  left join PS_BID_BidOpen t3 on (t1.DeviceCode=t3.DeviceCode and t1.EpsProjId=t3.EpsProjId and t3.Status>30 and t3.Type='技术') left join Sus_Pur_ExpertReview t4 on (t1.DeviceCode=t4.DeviceCode and t1.EpsProjId=t4.EpsProjId and t4.Status=50) left join PS_BID_BidOpen t5 on (t1.DeviceCode=t3.DeviceCode and t1.EpsProjId=t5.EpsProjId and t5.Status>30 and t5.Type='商务') left join PS_BID_BidReview t6 on (t1.DeviceCode=t6.DeviceCode and t1.EpsProjId=t6.EpsProjId and t6.Status=50) left join PS_CM_SubContract t7 on (t1.DeviceCode=t7.DeviceCode and t1.EpsProjId=t7.EpsProjId and t7.Status=50) left join Contract_registration t8 on (t1.DeviceCode=t8.device_number and t1.EpsProjId=t8.EpsProjId and t8.Status=50) where t1.DeviceCode is not null and t1.Status=50";
             try
             {
@@ -367,25 +413,25 @@ namespace Power.SusControl
                     result.message = "找不到实际完成时间";
                     return result.ToJson();
                 }
-                foreach(System.Data.DataRow row in dtProjPlan.Rows )
+                foreach ( System.Data.DataRow row in dtProjPlan.Rows )
                 {
                     string projId = row["EpsProjId"].ToString(), planId = row["PlanId"].ToString();
-                    if ( projPlanMap.ContainsKey(projId))
+                    if ( projPlanMap.ContainsKey(projId) )
                         projPlanMap[projId] = planId;
                     else
-                        projPlanMap.Add(projId,planId);
+                        projPlanMap.Add(projId, planId);
                 }
                 var dt = XCode.DataAccessLayer.DAL.QuerySQL(sqlText);
-                string  _keywordcontrol = "Sus_Pur_PlanControl", _keywordcontroldtl = "Sus_Pur_PlanControlDtl";
+                string _keywordcontrol = "Sus_Pur_PlanControl", _keywordcontroldtl = "Sus_Pur_PlanControlDtl";
                 var plandtlOpt = Power.Business.BusinessFactory.CreateBusinessOperate(_keywordcontroldtl);
-                var planDtlList = plandtlOpt.FindAll("","","",0,0,SearchFlag.IgnoreRight);
+                var planDtlList = plandtlOpt.FindAll("", "", "", 0, 0, SearchFlag.IgnoreRight);
                 if ( planDtlList == null || planDtlList.Count == 0 )
                     throw new Exception("采购计划详情不存在");
                 NewLife.Log.XTrace.WriteException("获取采购计划详情成功");
                 var actualFinishList = new List<Models.PurPlanRow>();
                 //result.list = actualFinishList;
                 int rowCount = 0;
-                using(var trans=new XCode.EntityTransaction(plandtlOpt.GetEntityOperate()))
+                using ( var trans = new XCode.EntityTransaction(plandtlOpt.GetEntityOperate()) )
                 {
                     //取出实际完成时间的行.
                     foreach ( System.Data.DataRow dr in dt.Rows )
